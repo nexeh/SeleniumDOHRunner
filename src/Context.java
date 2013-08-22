@@ -1,6 +1,6 @@
 public class Context {
 	
-	private String hostURL = "";
+	private String host = "";
 	private String hostPort = "";
 	private String runnerPath = "";
 	private String testModule = "";
@@ -8,12 +8,13 @@ public class Context {
 	private String hubUrl = "";
 	private String jsocverContent = "";
 	private String pluginString = "";
+	private String path = "";
 	
-	public String getHostURL() {
-		return hostURL;
+	public String getHost() {
+		return host;
 	}
-	public void setHostURL(String hostURL) {
-		this.hostURL = hostURL;
+	public void setHost(String host) {
+		this.host = host;
 	}
 	public String getHostPort() {
 		return hostPort;
@@ -57,15 +58,42 @@ public class Context {
 	public void setPluginString(String pluginString) {
 		this.pluginString = pluginString;
 	}
+	public String getPath() {
+		return path;
+	}
+	public void setPath(String path) {
+		this.path = path;
+	}
 	@Override
 	public String toString() {
-		return "Context [hostURL=" + hostURL + ", hostPort=" + hostPort
+		return "Context [hostURL=" + host + ", hostPort=" + hostPort
 				+ ", runnerPath=" + runnerPath + ", testModule=" + testModule
 				+ ", isAsync=" + isAsync + ", hubUrl=" + hubUrl
 				+ ", jsocverContent=" + jsocverContent + ", pluginString="
-				+ pluginString + "]";
+				+ pluginString + ", isUsingSeleniumHub()="
+				+ isUsingSeleniumHub() + ", isUsingJscover()="
+				+ isUsingJscover() + "]";
+	}
+	public boolean isUsingSeleniumHub() {
+		
+		if(!this.hubUrl.isEmpty()) {
+			return true;
+		}
+		
+		return false;
+	}
+	public boolean isUsingJscover() {
+		if(!this.jsocverContent.isEmpty()) {
+			return true;
+		}
+		return false;
 	}
 	
-	
+	public boolean isUsingPlugins() {
+		if(!this.pluginString.isEmpty()) {
+			return true;
+		}
+		return false;
+	}
 	
 }
