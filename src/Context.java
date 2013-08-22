@@ -9,6 +9,8 @@ public class Context {
 	private String jsocverContent = "";
 	private String pluginString = "";
 	private String path = "";
+	private String browser = "firefox";
+	private boolean customFirefoxProfile = false;
 	
 	public String getHost() {
 		return host;
@@ -63,6 +65,20 @@ public class Context {
 	}
 	public void setPath(String path) {
 		this.path = path;
+	}
+	
+	public String getBrowser() {
+		return browser;
+	}
+	public void setBrowser(String browser) {
+		this.browser = browser;
+	}
+	
+	public boolean isCustomFirefoxProfile() {
+		return customFirefoxProfile;
+	}
+	public void setCustomFirefoxProfile(boolean customFirefoxProfile) {
+		this.customFirefoxProfile = customFirefoxProfile;
 	}
 	@Override
 	public String toString() {
