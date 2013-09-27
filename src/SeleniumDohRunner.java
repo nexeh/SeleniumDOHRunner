@@ -23,8 +23,6 @@ public class SeleniumDohRunner {
 
 	public static void main(String args[]) throws MalformedURLException {
 
-		System.out.println("Start");
-
 		Options opt = new Options(args, 5);
 
 		opt.getSet().addOption("a", Multiplicity.ZERO_OR_ONE);
@@ -33,9 +31,11 @@ public class SeleniumDohRunner {
 		opt.getSet().addOption("h", Separator.EQUALS, Multiplicity.ZERO_OR_ONE);
 		opt.getSet().addOption("p", Separator.EQUALS, Multiplicity.ZERO_OR_ONE);
 		opt.getSet().addOption("x", Multiplicity.ZERO_OR_ONE);
+		opt.getSet().addOption("l", Separator.EQUALS, Multiplicity.ZERO_OR_ONE);
+		opt.getSet().addOption("o", Separator.EQUALS, Multiplicity.ZERO_OR_ONE);
 
 		if (!opt.check()) {
-			System.out.println("Exit");
+			printHelp();
 			System.exit(1);
 		}
 
@@ -68,6 +68,16 @@ public class SeleniumDohRunner {
 		if (opt.getSet().isSet("x")) {
 			runnerContext.setCustomFirefoxProfile(true);
 		}
+		
+		if (opt.getSet().isSet("l")) {
+			String value = opt.getSet().getOption("l").getResultValue(0);
+			runnerContext.setUsingLoadedPlugin(Boolean.parseBoolean(value));
+		}
+		
+		if (opt.getSet().isSet("o")) {
+			String value = opt.getSet().getOption("o").getResultValue(0);
+			runnerContext.setUsingConsoleLogPlugin(Boolean.parseBoolean(value));
+		}
 
 		runnerContext.setHost(opt.getSet().getData().get(0));
 		runnerContext.setHostPort(opt.getSet().getData().get(1));
@@ -80,7 +90,29 @@ public class SeleniumDohRunner {
 		SeleniumDohRunner runner = new SeleniumDohRunner();
 		runner.run(runnerContext);
 
-		System.out.println("End");
+	}
+	
+	private static void printHelp() {
+		StringBuffer helpText = new StringBuffer();
+		helpText.append("Syntax:");
+
+		helpText.append("java SeleniumDohRunner [-a] [-c=<jsocverContent>] [-h=<hubUrl>] [-p=<pluginString>] [-b=<browser>] [-l=<false>] [-o=<false>] HostURL HostPort RunnerPath TestModule Path");
+
+		helpText.append("Example");
+
+		helpText.append("java SeleniumDohRunner -a -c=jscoverage.html -h=http://localhost:4444/wd/hub -p=lmig/patches/doh/DohRunner;lmig/patches/doh/DohRunnerCI -b=firefox localhost 8080 PmDojo/util/doh/runner.html com.lmig.modulename test,com.lmig.modulename");
+
+		helpText.append("Options");
+		helpText.append("-a  : Async on. Default is false.");
+		helpText.append("-b=<browser : If you have a preference on the browser to run on");
+		helpText.append("-x : This is used to add a custom firefox profile that turns off the unresponsive script dialog in firefox. In the future id like a way to pass this in a better way.");
+		helpText.append("-c=<jsocverContent>: Indicates that jscover will be used by passing the relative url");
+		helpText.append("-h=<hubUrl> : Indicates that a selenium hub is in by by passing the Selenium hub url");
+		helpText.append("-p=<pluginString> : Used to add monkey patches to the url.");
+		helpText.append("-l=<false> : Default is true. This indicates if you are using a patch to the doh runner.html that adds a div with an id of 'loaded' when the tests begin to run. If this is true there will be a selenium WebDriverWait setup to timeout after 30 seconds. This is used because DOH will give no indication that something has gone wrong and will sit there forever.");
+		helpText.append("-o=<false> : Default is true. This indicates if you are using a patch to the doh runner.html that adds a div with an id of 'consoleLog' that contains the browsers console log. If this is true then we will take the contents of this div and put it into the CI console log for debugging purposes.");
+		
+		System.out.println(helpText.toString());
 
 	}
 
@@ -106,6 +138,7 @@ public class SeleniumDohRunner {
 
 			// navigate to the jscoverage page. by starting our tests from the
 			// jscoverage page we will be able to generate the coverage report
+			System.out.println("JsCover is being used. Navigating to: " + buildJscoverUrl());
 			driver.get(buildJscoverUrl());
 
 			// Once the page is loaded, we need to find and clear the text in
@@ -129,6 +162,8 @@ public class SeleniumDohRunner {
 		else {
 			// else jscover isnt being used
 			// navaigate to the doh test harness
+			System.out.println("Navigating to: " + dohUrl);
+			driver.get(dohUrl);
 		}
 
 		// wait to see if dojo, tests, and all required files load successfully
@@ -138,14 +173,19 @@ public class SeleniumDohRunner {
 		// a plugin/patch that will added a loaded class to the dom when
 		// everything is loaded. Fix this
 		try {
-			// Wait till the modules are traversed and the tests start. this is
-			// were things could go wrong and prevent the test harness from
-			// running
-			WebDriverWait loadWait = new WebDriverWait(driver, 30);
-			loadWait.until(ExpectedConditions.presenceOfElementLocated(By
-					.id("loaded")));
+			
+			// if there is a plugin being used that will indicate the tests 
+			// have successfully started to run, then we can setup a wait.
+			if(runContext.isUsingLoadedPlugin()) {
+				// Wait till the modules are traversed and the tests start. this is
+				// were things could go wrong and prevent the test harness from
+				// running
+				WebDriverWait loadWait = new WebDriverWait(driver, 30);
+				loadWait.until(ExpectedConditions.presenceOfElementLocated(By
+						.id("loaded")));
+			}
 		} catch (TimeoutException e) {
-
+			
 			// Attempt to get the browser log
 			WebElement consoleLogNode = driver.findElement(By.id("consoleLog"));
 
@@ -161,11 +201,15 @@ public class SeleniumDohRunner {
 			System.out
 					.println("or anything else that could have caused a 404.");
 			System.out.println("");
-			System.out.println("CONSOLE LOG");
-			System.out.println("");
-			System.out.println(consoleLogNode.getText());
-			System.out
-					.println("*****************************************************************");
+			
+			if(runContext.isUsingConsoleLogPlugin()) {
+				System.out.println("CONSOLE LOG");
+				System.out.println("");
+				System.out.println(consoleLogNode.getText());
+				System.out
+						.println("*****************************************************************");
+			}
+			
 			closeBrowser();
 
 			// exit with a code greater than 0 to break the build!
@@ -223,6 +267,7 @@ public class SeleniumDohRunner {
 			FirefoxProfile profile = new FirefoxProfile();
 
 			profile.setPreference("dom.max_script_run_time", 0);
+			profile.setPreference("intl.accept_languages", "en-US, en");
 			capabilities.setCapability(FirefoxDriver.PROFILE, profile);
 
 			return capabilities;

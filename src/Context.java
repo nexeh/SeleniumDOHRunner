@@ -11,6 +11,8 @@ public class Context {
 	private String path = "";
 	private String browser = "firefox";
 	private boolean customFirefoxProfile = false;
+	private boolean usingLoadedPlugin = true;
+	private boolean usingConsoleLogPlugin = true;
 	
 	public String getHost() {
 		return host;
@@ -80,15 +82,30 @@ public class Context {
 	public void setCustomFirefoxProfile(boolean customFirefoxProfile) {
 		this.customFirefoxProfile = customFirefoxProfile;
 	}
+	
+	public boolean isUsingLoadedPlugin() {
+		return usingLoadedPlugin;
+	}
+	public void setUsingLoadedPlugin(boolean usingLoadedPlugin) {
+		this.usingLoadedPlugin = usingLoadedPlugin;
+	}
+	public boolean isUsingConsoleLogPlugin() {
+		return usingConsoleLogPlugin;
+	}
+	public void setUsingConsoleLogPlugin(boolean usingConsoleLogPlugin) {
+		this.usingConsoleLogPlugin = usingConsoleLogPlugin;
+	}
+
 	@Override
 	public String toString() {
-		return "Context [hostURL=" + host + ", hostPort=" + hostPort
+		return "Context [host=" + host + ", hostPort=" + hostPort
 				+ ", runnerPath=" + runnerPath + ", testModule=" + testModule
 				+ ", isAsync=" + isAsync + ", hubUrl=" + hubUrl
 				+ ", jsocverContent=" + jsocverContent + ", pluginString="
-				+ pluginString + ", isUsingSeleniumHub()="
-				+ isUsingSeleniumHub() + ", isUsingJscover()="
-				+ isUsingJscover() + "]";
+				+ pluginString + ", path=" + path + ", browser=" + browser
+				+ ", customFirefoxProfile=" + customFirefoxProfile
+				+ ", usingLoadedPlugin=" + usingLoadedPlugin
+				+ ", usingConsoleLogPlugin=" + usingConsoleLogPlugin + "]";
 	}
 	public boolean isUsingSeleniumHub() {
 		
@@ -111,5 +128,4 @@ public class Context {
 		}
 		return false;
 	}
-	
 }
