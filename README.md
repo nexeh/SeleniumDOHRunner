@@ -13,6 +13,7 @@ Example
 	java SeleniumDohRunner -a -c=jscoverage.html -h=http://localhost:4444/wd/hub -p=lmig/patches/doh/DohRunner;lmig/patches/doh/DohRunnerCI -b=firefox localhost 8080 PmDojo/util/doh/runner.html com.lmig.modulename test,com.lmig.modulename
 
 Options
+
 	-a  : Async on. Default is false.
 	-b=<browser : If you have a preference on the browser to run on
 	-x : This is used to add a custom firefox profile that turns off the unresponsive script dialog in firefox. In the future id like a way to pass this in a better way.
