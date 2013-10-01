@@ -1,17 +1,35 @@
 <project name="Selenium DOH Runner" default="compile" basedir=".">
 	
-	<property name="seleniumLibs" location="..\Selenium\selenium-java-2.32.0\selenium-2.33.0\selenium-2.33.0\selenium-2.33.0\libs"/>
+    <property name="src.dir" value="src"/>
+    <property name="build.dir" value="bin"/>
+	<property name="dist.dir" value="dist"/>
+    <property name="main-class" value="SeleniumDohRunner"/>
+	
+	<property name="selenium.libs" location="D:\Workspaces\Oct\eCommonClientCI\libs\Selenium\selenium-2.33.0"/>
+	<path id="classpath">
+        <fileset dir="${selenium.libs}" includes="**/*.jar"/>
+		<fileset dir="lib" includes="*.jar"/>
+    </path>
 
 	<target name="compile">
-		<mkdir dir="dist"/>
-		<javac srcdir="src"
-         destdir="dist"
-         classpath="${seleniumLibs},libs"
+		<mkdir dir="${build.dir}"/>
+		<javac srcdir="${src.dir}"
+         destdir="${build.dir}"
+		 classpathref="classpath"
 		/>
 	</target>
 	
-	<target name="clean">
-		
+	<target name="dist" depends="compile" >
+		<mkdir dir="${dist.dir}"/>
+		<jar destfile="${dist.dir}\SeleniumDohRunner.jar" basedir="${build.dir}" />
+		<copy todir="${dist.dir}">
+		  <fileset dir="lib"/>
+		</copy>
 	</target>
+	
+	<target name="clean">
+        <delete dir="${build.dir}"/>
+		<delete dir="${dist.dir}"/>
+    </target>
 	
 </project>
